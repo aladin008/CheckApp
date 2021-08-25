@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,10 +31,11 @@ namespace CheckApp
 
         static void Main(string[] args)
         {
-            while (true)
+            //while (true)
             {
-                GetProductAsync();
-                Thread.Sleep(5*60 * 1000);
+                PutProductAsync();
+                //GetProductAsync();
+                //Thread.Sleep(5*60 * 1000);
             }
         }
 
@@ -56,6 +58,34 @@ namespace CheckApp
 
                 //logger.LogInformation(message);
               
+            }
+            return;
+        }
+
+        static public void PutProductAsync()
+        {
+            var product = new Product{ Id = 1, Name = "Yo-yo", Category = "Toys", Price = 3.75M };
+
+            string output = JsonConvert.SerializeObject(product);
+            
+            var requestContent = new StringContent(output, Encoding.UTF8, "application/json");
+
+            string path = "https://productsapp20210818221653.azurewebsites.net/api/Products";
+            client.BaseAddress = new Uri(path);
+            client.DefaultRequestHeaders.Accept.Add(
+           new MediaTypeWithQualityHeaderValue("application/json"));
+
+
+            var response = client.PutAsync(path, requestContent).Result;
+            if (response.IsSuccessStatusCode)
+            {
+                var message = response.Content.ReadAsStringAsync().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+
+                LogMessage(message);
+
+
+                //logger.LogInformation(message);
+
             }
             return;
         }
